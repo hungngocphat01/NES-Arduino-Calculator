@@ -55,6 +55,7 @@ Work-in-progress
 - Shift button (separate button).
 - Layout:
   <table class="tg">
+    <tbody>
     <tr>
       <th class="tg-0lax">1</th>
       <th class="tg-0lax">2</th>
@@ -79,10 +80,12 @@ Work-in-progress
       <td class="tg-0lax">=</td>
       <td class="tg-0lax">/</td>
     </tr>
+  </tbody>
   </table>
 
 - Layout when shift button is pressed:
   <table class="tg">
+  <tbody>
     <tr>
       <th class="tg-0lax">^</th>
       <th class="tg-0lax">sqrt</th>
@@ -107,6 +110,7 @@ Work-in-progress
       <td class="tg-0lax">=</td>
       <td class="tg-0lax"></td>
     </tr>
+  </tbody>
   </table>
 
 ## Output
