@@ -47,8 +47,8 @@ Work-in-progress
 
 ## How does it work
 - The calculator receives input from the 4x4 matrix keypad, parses the tokens immediately as soon as they are sent from the keypad, and categorizes them into ``numbers`` and ``operators``.
-- After that, it will convert the original infix expression into a postfix expression, then evaluate it (Shunting-yard algorithm).
-- The result will appear on the LCD screen if there is no error reported.
+- After that, the board converts the original infix expression into a postfix expression, then evaluates it (Shunting-yard algorithm).
+- The result will appear on the LCD screen if there was no error reported.
 
 ## Input
 - 4x4 matrix keypad.
@@ -113,7 +113,7 @@ Work-in-progress
 - Evaluated value if there was no error reported.
 - Error message if there was at least an error occured:
   - Math Error: divide by 0, or sqrt of negative number.
-  - Syntax Error: syntatic error, for instance: 
+  - Syntax Error: for instance
     ```
     1 * + 5
     4.2 - ( * 7 )
