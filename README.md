@@ -120,5 +120,12 @@ Work-in-progress
     etc.
     ```
 
+## What's working
+- Input, evaluation, output to serial monitor.
+
+## What's not working/features being added in the future
+- Output to LCD display.
+- Edit the input expression.
+
 ## Debugging
 - The calculator will print the converted postfix expression as well as the final result to serial monitor (baud rate 9600).
