@@ -73,13 +73,13 @@ void showMathErr() {
 
 /* Rules:
 - Dot: after and before must be a number.
-- Double operator:
+- Double operator (+ - * / ^):
     + Before: number, ')'.
     + After: number, '(', single operator
 - Double operator '-':
     + Before: same, plus '(' or none
     + After: same
-- Single operator:
+- Single operator (sin cos tan sqrt):
     + Before: operator, none
     + After: '(', number
 - '(':

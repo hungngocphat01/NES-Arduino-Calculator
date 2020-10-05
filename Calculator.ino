@@ -38,9 +38,16 @@ char readKey() {
     case '2': return SQRT;
     case '4': return '(';
     case '5': return ')';
+    case '7': return '<'; // Left key
+    case '8': return '>'; // Right key
+    case '0': return '!'; // Delete key
     }
   }
   return key;
+}
+
+bool isSpecialKey(String key) {
+    return (key == "<" || key == ">" || key == "!");
 }
 
 String getKeyStr() {
