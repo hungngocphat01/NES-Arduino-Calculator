@@ -50,6 +50,13 @@ Work-in-progress
 - After that, the board converts the original infix expression into a postfix expression, then evaluates it (Shunting-yard algorithm).
 - The result will appear on the LCD screen if there was no error reported.
 
+## Source code structure
+- ``Calculator.ino``: literally ``main.cpp``.
+- ``ExprCalc.h``: shunting-yard algorithm implementation.
+- ``Stack.h``: implementations of ``sstack`` (``String`` stack) and ``fstack`` (``float`` stack).
+- ``Screen.h``: implementation of LCD printing thingy (almost empty at the moment).
+- ``tokenizer.py``: creates an array of tokens, for debugging purpose only.
+
 ## Input
 - 4x4 matrix keypad.
 - Shift button (separate button).
