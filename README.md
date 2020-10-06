@@ -50,6 +50,13 @@ Work-in-progress
 - After that, the board converts the original infix expression into a postfix expression, then evaluates it (Shunting-yard algorithm).
 - The result will appear on the LCD screen if there was no error reported.
 
+## Source code structure
+- ``Calculator.ino``: literally ``main.cpp``.
+- ``ExprCalc.h``: shunting-yard algorithm implementation.
+- ``Stack.h``: implementations of ``sstack`` (``String`` stack) and ``fstack`` (``float`` stack).
+- ``Screen.h``: implementation of LCD printing thingy (almost empty at the moment).
+- ``tokenizer.py``: creates an array of tokens, for debugging purpose only.
+
 ## Input
 - 4x4 matrix keypad.
 - Shift button (separate button).
@@ -89,19 +96,19 @@ Work-in-progress
     <tr>
       <th class="tg-0lax">^</th>
       <th class="tg-0lax">sqrt</th>
-      <th class="tg-0lax"></th>
+      <th class="tg-0lax">pi</th>
       <th class="tg-0lax">sin</th>
     </tr>
     <tr>
       <td class="tg-0lax">(</td>
       <td class="tg-0lax">)</td>
-      <td class="tg-0lax"></td>
+      <td class="tg-0lax">e</td>
       <td class="tg-0lax">cos</td>
     </tr>
     <tr>
       <td class="tg-0lax">LEFT</td>
       <td class="tg-0lax">RIGHT</td>
-      <td class="tg-0lax"></td>
+      <td class="tg-0lax">Ans</td>
       <td class="tg-0lax">tan</td>
     </tr>
     <tr>
