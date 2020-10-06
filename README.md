@@ -96,19 +96,19 @@ Work-in-progress
     <tr>
       <th class="tg-0lax">^</th>
       <th class="tg-0lax">sqrt</th>
-      <th class="tg-0lax"></th>
+      <th class="tg-0lax">pi</th>
       <th class="tg-0lax">sin</th>
     </tr>
     <tr>
       <td class="tg-0lax">(</td>
       <td class="tg-0lax">)</td>
-      <td class="tg-0lax"></td>
+      <td class="tg-0lax">e</td>
       <td class="tg-0lax">cos</td>
     </tr>
     <tr>
       <td class="tg-0lax">LEFT</td>
       <td class="tg-0lax">RIGHT</td>
-      <td class="tg-0lax"></td>
+      <td class="tg-0lax">Ans</td>
       <td class="tg-0lax">tan</td>
     </tr>
     <tr>
