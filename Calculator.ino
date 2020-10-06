@@ -2,6 +2,7 @@
 #include "ExprCalc.h"
 
 #define None "None"
+#define NO_NEWLINE false
 
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //four columns
@@ -25,6 +26,18 @@ const byte shiftKey = LOW;
 void setup(){
   Serial.begin(9600);
   pinMode(shiftPin, INPUT_PULLUP);
+
+  lcd.init();
+  lcd.backlight();
+  lcd.print(F("Arduino"));
+  lcd.setCursor(0, 1);
+  lcd.print(F("Simple Calc"));
+  delay(1500);
+  lcd.clear();
+  lcd.print(F("NES  HCMUS  2020"));
+  lcd.setCursor(0, 1);
+  lcd.print(F("Ngoc Phat  K19IT"));
+  delay(500);
 }
 
 char readKey() {
@@ -36,6 +49,9 @@ char readKey() {
     case '*': return TAN;
     case '1': return '^';
     case '2': return SQRT;
+    case '3': return PIKEY;
+    case '6': return EKEY;
+    case '9': return ANSKEY;
     case '4': return '(';
     case '5': return ')';
     case '7': return '<'; // Left key
@@ -65,6 +81,12 @@ String getKeyStr() {
       break;
      case SQRT:
       return "sqrt";
+     case PIKEY:
+      return "pi";
+     case EKEY:
+      return "e";
+     case ANSKEY:
+      return "Ans";
      }
      return String(key);
   }
@@ -72,8 +94,10 @@ String getKeyStr() {
 }
 
 String tokens[max_size];
-byte ti = 0;
+int ti = 0;
+int scrollIndex = 0;
 
+// main func
 void loop(){
   String key = getKeyStr();
   if (key != None) {
@@ -81,19 +105,65 @@ void loop(){
     byte currTokenType = getTokenType(tokens[ti]);
     Serial.print(key);
     
+    
     if (key == "=") {
        Serial.println();
-       //foo(tokens, ti + 1);
-       //printArr(tokens, ti + 1);
-       sstack postfix = ConvertToPostfix(tokens, ti + 1);
-       printArr(postfix.data, postfix.index + 1);
-       float result = PostfixEvaluate(postfix);
-       Serial.println();
-       Serial.println(result);
-       halt;
+       sprintMemoryUsage(F("Free mem when pressed =: "));
+
+       sstack postfix;
+       ConvertToPostfix(tokens, ti + 1, postfix);
+    
+       if (!errflag) {
+           sprintArr(postfix.data, postfix.index + 1);
+           
+           float result = PostfixEvaluate(postfix);
+           int precision = 6;
+           Serial.println();
+           Serial.println(result, precision);
+     
+           lcd.clear();
+           lcd.home();
+           lcd.noBlink();
+           lcd.print("Result:");
+           lcd.setCursor(0, 1);
+           lcd.print(result, precision);
+       }
+       else {
+            // After handling
+            errflag = false;
+       }
+
+       // Reset
+       ti = 0;
+       tokens[ti] = "";
+       return;
+    }
+    else if (key == "<") {
+        return;
+    }
+    else if (key == ">") {
+        return;
+    }
+    else if (key == "!") {
+        if (currTokenType == NUM && tokens[ti] != "Ans") {
+            tokens[ti].remove(tokens[ti].length() - 1);
+        }
+        else {
+            tokens[ti] = "";
+            ti--;
+        }
+                
+        Serial.print(F("\nAfter remove: "));
+        sprintArr(tokens, ti + 1, NO_NEWLINE);
+
+        printExpression(tokens, ti + 1);
+        return;
     }
 
+    // Bound checking
     if (ti >= max_size) return;
+    if (ti < 0) ti = 0;
+    
     if (currTokenType == UNK) {
       tokens[ti] = key;
     }
@@ -104,6 +174,7 @@ void loop(){
       ti++;
       tokens[ti] = key;
     }
+    printExpression(tokens, ti + 1);
   }
   delay(100);
 }

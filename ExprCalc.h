@@ -5,6 +5,9 @@
 #define COS 2
 #define TAN 3
 #define SQRT 4
+#define PIKEY 5
+#define EKEY 6
+#define ANSKEY 7
 
 #define UNK 0
 #define NUM 1
@@ -13,6 +16,9 @@
 #define E 2.71828182
 
 #define halt while(1)
+
+float Ans = 0;
+bool errflag = false;
 
 int getTokenType(String token) {
   if (token.length() == 0) {
@@ -27,20 +33,26 @@ int getTokenType(String token) {
   }
 }
 
-inline bool isOperator (String token) {
+inline bool isOperator (const String& token) {
     return (getTokenType(token) == OPR);
 }
 
-inline bool isNumber(String token) {
+inline bool isNumber(const String& token) {
     return (getTokenType(token) == NUM);
 }
 
-inline bool isSingleOp(String token) {
+inline bool isSingleOp(const String& token) {
     return (token == "sin" || token == "cos" || token == "tan" || token == "sqrt");
 }
 
-float convToFloat(String token) {
+float convToFloat(const String& token) {
     if (token.length() > 0) {
+        // Special constants
+        if (token == "pi") return PI;
+        if (token == "e") return E;
+        if (token == "Ans") return Ans;
+        
+        // Negative numbers handling since Arduino's .toFloat() cannot handle negative numbers
         if (token[0] == '-') {
             String positive;
             for (int i = 1; i < token.length(); i++) {
@@ -48,12 +60,13 @@ float convToFloat(String token) {
             }
             return (-1)*positive.toFloat();
         }
+        // Positive number
         return token.toFloat();
     }
     return 0;
 }
 
-int precedence(String op) {
+int precedence(const String& op) {
     if (op == "sin" || op == "cos" || op == "tan") return 4;
     else if (op == "^") return 3;
     else if (op == "*" || op == "/") return 2;
@@ -63,16 +76,24 @@ int precedence(String op) {
 
 void showSyntaxErr(int pos) {
     Serial.println(F("Syntax error"));
-    halt;
+    lcd.clear();
+    lcd.print(F("Syntax error"));
+    lcd.noBlink();
+    errflag = true;
 }
 
 void showMathErr() {
     Serial.println(F("Math error"));
-    halt;
+    lcd.clear();
+    lcd.print(F("Math error"));
+    lcd.noBlink();
+    errflag = true;
 }
 
 /* Rules:
-- Dot: after and before must be a number.
+- Number:
+    + Before: operator, '('
+    + After: operator
 - Double operator (+ - * / ^):
     + Before: number, ')'.
     + After: number, '(', single operator
@@ -97,10 +118,9 @@ void showMathErr() {
 then it is a negative sign
 */
 
-
-sstack ConvertToPostfix(String* infix, int n) {   
-    sstack result;
+void ConvertToPostfix(String* infix, int n, sstack& result) {
     sstack tmp;
+    sprintMemoryUsage(F("Free mem before conversion: "));
     
     for (int i = 0; i < n; i++) {
         String& token = infix[i];
@@ -152,13 +172,12 @@ sstack ConvertToPostfix(String* infix, int n) {
             tmp.push(token);
         }
         else if (isNumber(token)) {
-            if (token == ".") {
-                if (i == 0 || i == n - 1) showSyntaxErr(i);
-                if (i - 1 >= 0 && !isNumber(infix[i - 1])) showSyntaxErr(i);
-                if (i + 1 < n && !isNumber(infix[i + 1])) showSyntaxErr(i);
-            }
-
             result.push(token);
+        }
+
+        if (errflag) {
+            Serial.println("Error encountered");
+            return;
         }
     }
     while (!tmp.isEmpty() && tmp.top() != "(") {
@@ -167,12 +186,12 @@ sstack ConvertToPostfix(String* infix, int n) {
             result.push(pop);
         }
     }
-    return result;
 }
 
 
-float PostfixEvaluate(sstack postfix) {
+float PostfixEvaluate(const sstack& postfix) {
     fstack tmp;
+    sprintMemoryUsage(F("Free mem before evaluation: "));
     for (int i = 0; i <= postfix.index; i++) {
         String token = postfix[i];
         if (isNumber(token)) {
@@ -201,6 +220,11 @@ float PostfixEvaluate(sstack postfix) {
             } 
             else if (token == "^") tmp.push(pow(operand1, operand2));
         }
+        if (errflag) {
+            Serial.println("Error encountered");
+            return 0;
+        }
     }
+    Ans = tmp.top();
     return tmp.top();
 }
