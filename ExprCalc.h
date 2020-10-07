@@ -2,11 +2,14 @@
 #include "Utils.h"
 #include "Screen.h"
 
+// Token types
 #define UNK 0
 #define NUM 1
 #define OPR 2
 
 #define E 2.71828182
+
+#define OUTOFMEM "Out of memory"
 
 #define halt while(1)
 
