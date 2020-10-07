@@ -23,9 +23,12 @@ void setup(){
 
 // main func
 void loop(){
-    compMode();
+    // Default: menu mode
+    menuMode();
+
+    // The program shouldn't exit to here. If so, probably there was a bug
     lcd.clear();
-    lcd.print("An error occured");
+    lcd.print(F("An error occured"));
     lcd.setCursor(0, 1);
-    lcd.print("Please RESET");
+    lcd.print(F("Please RESET"));
 }
