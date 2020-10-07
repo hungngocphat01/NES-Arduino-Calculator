@@ -59,9 +59,9 @@ Work-in-progress
 - ``tokenizer.py``: creates an array of tokens, for debugging purpose only.
 
 ## 3. Program flow
-- The ``void loop()`` function calls the ``void menuMode()`` function. This function acts as the main function and the program will stay in this function under any circumstances. Here, the user chooses the operating mode of the calculator.
-  - If the user chooses COMP mode, ``void compMode()`` will be called. More details about ``compMode`` are available in **5.1**.
-  - The same thing happens with EQN mode (``void eqnMode()``) and INTERGRAL mode (``void intgrlMode()``).
+- The ``void loop()`` function calls the ``void menuMode()`` function. This function acts as the main function and the program execution will stay in this function under any circumstances. Here, the user chooses the operating mode of the calculator.
+  - If the user chooses COMP mode, ``void compMode()`` will be called.
+  - The same thing happens with EQN mode (``void eqnMode()``) and INTERGRAL mode (``void intgrlMode()``). More details about these mode are available in [5. Working modes](https://github.com/phathung2001/arduino-calculator#5-working-modes)
   - If the user presses the ``MODE`` button in COMP, EQN or INTEGRAL mode, the function which handles the respective mode will return. The program then goes back to ``void menuMode()``, waiting for another mode to be choosen.
 
 ## 4. Input
