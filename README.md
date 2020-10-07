@@ -3,7 +3,7 @@ Work-in-progress
 
 ## 0. Introduction.
 - This is a simple project of NES Academic Club, University of Science - Ho Chi Minh City, Vietnam.
-- This project manipulates Arduino into a simple calculator, with the ability to evaluate basic expressions (sin, cos, tan, sqrt supported); evaluate approximately value of single variable integral (via Riemann sum); and solve simple equations.
+- This project manipulates Arduino into a simple calculator, with the abilities to evaluate basic expressions (sin, cos, tan, sqrt supported); evaluate approximately value of single variable integral (using Riemann middle sum); and solve simple equations.
 - Project made from scratch and maintained by hungngocphat01, with the exception of ``Keypad.h`` (courtesy of Mark Stanley, Alexander Brevig) and ``LiquidCrystal_I2C.h`` (courtesy of Frank de Brabander).
 
 ## 1. Wiring
