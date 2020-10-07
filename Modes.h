@@ -1,9 +1,10 @@
 #include "Input.h"
-#include "Screen.h"
 
+// Modes
 #define COMPMODE 1
 #define EQNMODE 2
 #define INTGRLMODE 3
+#define ABOUTMODE 4
 #define MENUMODE 0
 
 // Function prototypes
@@ -11,46 +12,11 @@ bool modeKeyCheck (String key);
 void eqnMode();
 void compMode ();
 void menuMode();
-
-void printExpression(String* tokens, int n, int scroll = 0) {    
-    int totalLength = 0;
-    char buffer[BUFFERSIZE + 1];
-    int k = BUFFERSIZE;
-
-    for (int i = n - 1; i >= 0; i--) {
-        for (int j = tokens[i].length() - 1; j >= 0; j--) {
-            k--;
-            buffer[k] = tokens[i][j];
-            if (k <= 0) break;
-        }
-        if (k <= 0) break;
-    }
-    int len = BUFFERSIZE - k;
-
-    // Remove padding at the start
-    if (k > 0) {
-        for (int i = 0; i < len; i++) {
-            buffer[i] = buffer[i + k];
-        }   
-    }
-    buffer[len] = '\0';
-        
-    lcd.clear();
-    lcd.blink();
-    lcd.print(buffer);
-}
+void aboutMode();
 
 byte mode = MENUMODE;
 int currentDisplayingChars = 0;
 int scrollIndex = 0;
-
-bool modeKeyCheck (String key) {
-    if (key == "MODE") {
-        mode = MENUMODE;
-        return true;
-    }
-    return false;
-}
 
 void menuMode() {
     bool printMenu = true; // to fix flickering
@@ -60,16 +26,15 @@ void menuMode() {
         key = getKeyStr();
         if (printMenu) {
             lcd.clear(); lcd.noBlink();
-            lcd.print("1.CMP      2.EQN");
+            lcd.print("1.COMP     2.EQN");
             lcd.setCursor(0, 1);
-            lcd.print("3.INTEGRAL");
+            lcd.print("3.INTGRL 4.ABOUT");
             printMenu = false;
         }
         
         if (key == "1") {
             mode = COMPMODE;
             compMode();
-            Serial.println("Get out of func compMode");
             printMenu = true;
         }
         else if (key == "2") {
@@ -77,52 +42,103 @@ void menuMode() {
             eqnMode();  
             printMenu = true;
         }
+        else if (key == "4") {
+            mode = ABOUTMODE;
+            aboutMode();
+            printMenu = true;
+        }
+        
     }
 }
 
-void eqnMode() {
-    lcd.noBlink();
-
-    int page = 0;
-    String key;
-
+void aboutMode() {
     while (true) {
-        if (modeKeyCheck(key)) return;
-        if (page == 0) {
-            lcd.clear();
-            lcd.print("1.ax^2+bx+c=0");
-            lcd.setCursor(0, 1);
-            lcd.print("2.ax^3+bx^2...=0");
-    
-            do {
-                key = getKeyStr();
-                if (key == ">") page++;
-                else if (key == "1");
-                else if (key == "2");            
-            } while (key != ">" && key != "1" && key != "2" && key != "MODE");
+        lcd.clear();
+        lcd.print(F("NES  HCMUS  2020"));
+        lcd.setCursor(0, 1);
+        lcd.print(F("Ngoc Phat  K19IT"));
+        delay(4000);
+        lcd.clear();
+        lcd.print(F("Source code"));
+        lcd.setCursor(0, 1);
+        lcd.print(F("link:"));
+        delay(2000);
+        lcd.clear();
+        lcd.print(F("github/phathung2001/arduino-calculator"));
+        delay(1000);
+        for (int i = 0; i < 26; i++) {
+            lcd.scrollDisplayLeft();
+            delay(500);
         }
-        if (page == 1) {
-            lcd.clear();
-            lcd.print("1.ax+by=0");
-            lcd.setCursor(2,1);
-            lcd.print("cx+dy=0");
+        lcd.clear();
+        lcd.print(F("RESET to quit"));
+        delay(2000);
+    }
+}
+
+void printSolution(String msg, float value) {
+    lcd.clear();
+    lcd.print(msg);
+    lcd.setCursor(0, 1);
+    lcd.print(value, 6);
+
+    pressAnyKey();
+    lcd.clear();
+}
+
+void eqnMode() {
+    Serial.println(F("EQN mode choosen"));
+    lcd.noBlink();
+    String key;
+        
+    lcd.clear();
+    lcd.print(F("1.ax^2+bx+c=0"));
+    lcd.setCursor(0, 1);
+    lcd.print(F("2.ax+by=0"));
+
+    do {
+        key = getKeyStr();
+        delay(50);        
+    } while (key != "1" && key != "2" && key != "MODE");
     
-            do {
-                key = getKeyStr();
-                if (key == "<") {
-                    page--;
-                }
-                else if (key == "1");        
-            } while (key != "<" && key != "1" && key != "MODE");
+    if (modeKeyCheck(key)) return;
+    
+    // ax^2 + bx + c = 0
+    if (key == "1") {
+        Serial.println(F("Quadratic eq chosen"));
+        lcd.clear();
+        float a = scanCoefficient("a=");
+        float b = scanCoefficient("b=");
+        float c = scanCoefficient("c=");
+
+        float delta = b*b-4*a*c;
+
+        if (delta == 0) {
+            float x = -b/(2*a);
+            printSolution("x=", x);
+        }
+        else if (delta > 0) {
+            float x1 = (-b-sqrt(delta))/(2*a);
+            float x2 = (-b+sqrt(delta))/(2*a); 
+            printSolution("x1=", x1);
+            printSolution("x2=", x2);
+        }
+        else if (delta < 0) {
+            lcd.clear();
+            lcd.print("No solution");
         }
     }
+    else if (key == "2") {
+        
+    }
+    pressAnyKey();
 }
 
 void compMode () {
     lcd.clear();
     lcd.blink();
 
-    Serial.println("Get in function compMode:");
+    Serial.println(F("Get in function compMode:"));
     
     String tokens[max_size];
     int ti = 0;
@@ -136,8 +152,6 @@ void compMode () {
             Serial.print(key);
             
             if (modeKeyCheck(key)) return;
-            Serial.print("ti: ");
-            Serial.println(ti);
             
             if (key == "=") {
                 Serial.println();
@@ -157,7 +171,7 @@ void compMode () {
                     lcd.clear();
                     lcd.home();
                     lcd.noBlink();
-                    lcd.print("Result:");
+                    lcd.print(F("Result:"));
                     lcd.setCursor(0, 1);
                     lcd.print(result, precision);
                 }
