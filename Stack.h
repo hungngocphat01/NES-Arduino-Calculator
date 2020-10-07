@@ -1,4 +1,4 @@
-static const int max_size = 35;
+static const int max_size = 30;
 
 struct sstack {
     int index = -1;
