@@ -1,7 +1,7 @@
 # Arduino simple calculator
 Work-in-progress
 
-## Wiring
+## 1. Wiring
 <table class="tg">
 <thead>
   <tr>
@@ -45,19 +45,14 @@ Work-in-progress
 </tbody>
 </table>
 
-## How does it work
-- The calculator receives input from the 4x4 matrix keypad, parses the tokens immediately as soon as they are sent from the keypad, and categorizes them into ``numbers`` and ``operators``.
-- After that, the board converts the original infix expression into a postfix expression, then evaluates it (Shunting-yard algorithm).
-- The result will appear on the LCD screen if there was no error reported.
-
-## Source code structure
+## 2. Source code structure
 - ``Calculator.ino``: literally ``main.cpp``.
 - ``ExprCalc.h``: shunting-yard algorithm implementation.
 - ``Stack.h``: implementations of ``sstack`` (``String`` stack) and ``fstack`` (``float`` stack).
 - ``Screen.h``: implementation of LCD printing thingy (almost empty at the moment).
 - ``tokenizer.py``: creates an array of tokens, for debugging purpose only.
 
-## Input
+## 3. Input
 - 4x4 matrix keypad.
 - Shift button (separate button).
 - Layout:
@@ -120,7 +115,15 @@ Work-in-progress
   </tbody>
   </table>
 
-## Output
+## 4. Working modes
+### 4.1. COMP mode
+
+#### 4.1.1. How does it work
+- The calculator receives input from the 4x4 matrix keypad, parses the tokens immediately as soon as they are sent from the keypad, and categorizes them into ``numbers`` and ``operators``.
+- After that, the board converts the original infix expression into a postfix expression, then evaluates it (Shunting-yard algorithm).
+- The result will appear on the LCD screen if there was no error reported.
+
+#### 4.1.2. Output
 - Evaluated value if there was no error reported.
 - Error message if there was at least an error occured:
   - Math Error: divide by 0, or sqrt of negative number.
@@ -130,13 +133,20 @@ Work-in-progress
     4.2 - ( * 7 )
     etc.
     ```
+### 4.2. EQN mode
+- To be added.
+### 4.3. Integral mode
+- To be added.
 
-## What's working
+## 5. What's working
 - Input, evaluation, output to serial monitor.
-
-## What's not working/features being added in the future
 - Output to LCD display.
-- Edit the input expression.
+- Edit the expression.
 
-## Debugging
+## 6. What's not working/features being added in the future
+- Screen scrolling.
+- EQN mode.
+- Integral mode.
+
+## 7. Debugging
 - The calculator will print the converted postfix expression as well as the final result to serial monitor (baud rate 9600).
