@@ -1,13 +1,6 @@
 #include "Stack.h"
+#include "Utils.h"
 #include "Screen.h"
-
-#define SIN 1
-#define COS 2
-#define TAN 3
-#define SQRT 4
-#define PIKEY 5
-#define EKEY 6
-#define ANSKEY 7
 
 #define UNK 0
 #define NUM 1
@@ -21,16 +14,16 @@ float Ans = 0;
 bool errflag = false;
 
 int getTokenType(String token) {
-  if (token.length() == 0) {
-    return UNK;
-  }
-  if (token == "+" || token == "-" || token == "*" || token == "/" || token == "sin" || token == "cos" || token == "tan" || token == "^" || token == "sqrt" ||
-    token == "(" || token == ")" || token == "=") {
-    return OPR;
-  }
-  else {
-    return NUM;
-  }
+    if (token.length() == 0) {
+        return UNK;
+    }
+    if (token == "+" || token == "-" || token == "*" || token == "/" || token == "sin" || token == "cos" || token == "tan" || token == "^" || token == "sqrt" ||
+        token == "(" || token == ")" || token == "=") {
+        return OPR;
+    }
+    else {
+        return NUM;
+    }
 }
 
 inline bool isOperator (const String& token) {
