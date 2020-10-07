@@ -1,6 +1,10 @@
 # Arduino simple calculator
 Work-in-progress
 
+## 0. Introduction.
+- This is a simple project of NES Academic Club, University of Science - Ho Chi Minh City, Vietnam. Project maintained by hungngocphat01.
+- This project manipulates Arduino into a simple calculator, with the ability to evaluate basic expressions (sin, cos, tan, sqrt supported); approximately evaluate single variable integral (via Riemann sum); 
+
 ## 1. Wiring
 <table class="tg">
 <thead>
@@ -49,10 +53,18 @@ Work-in-progress
 - ``Calculator.ino``: literally ``main.cpp``.
 - ``ExprCalc.h``: shunting-yard algorithm implementation.
 - ``Stack.h``: implementations of ``sstack`` (``String`` stack) and ``fstack`` (``float`` stack).
-- ``Screen.h``: implementation of LCD printing thingy (almost empty at the moment).
+- ``Screen.h``: prototype of LCD printing function.
+- ``Input.h``: functions to examine and process keystrokes.
+- ``Modes.h``: functions to handle supported modes of the calculator.
 - ``tokenizer.py``: creates an array of tokens, for debugging purpose only.
 
-## 3. Input
+## 3. Program flow
+- The ``void loop()`` function calls the ``void menuMode()`` function. This function acts as the main function and the program will stay in this function under any circumstances. Here, the user chooses the operating mode of the calculator.
+  - If the user chooses COMP mode, ``void compMode()`` will be called. More details about ``compMode`` are available in **5.1**.
+  - The same thing happens with EQN mode (``void eqnMode()``) and INTERGRAL mode (``void intgrlMode()``).
+  - If the user presses the ``MODE`` button in COMP, EQN or INTEGRAL mode, the function which handles the respective mode will return. The program then goes back to ``void menuMode()``, waiting for another mode to be choosen.
+
+## 4. Input
 - 4x4 matrix keypad.
 - Shift button (separate button).
 - Layout:
@@ -115,15 +127,15 @@ Work-in-progress
   </tbody>
   </table>
 
-## 4. Working modes
-### 4.1. COMP mode
+## 5. Working modes
+### 5.1. COMP mode
 
-#### 4.1.1. How does it work
+#### 5.1.1. How does it work
 - The calculator receives input from the 4x4 matrix keypad, parses the tokens immediately as soon as they are sent from the keypad, and categorizes them into ``numbers`` and ``operators``.
 - After that, the board converts the original infix expression into a postfix expression, then evaluates it (Shunting-yard algorithm).
 - The result will appear on the LCD screen if there was no error reported.
 
-#### 4.1.2. Output
+#### 5.1.2. Output
 - Evaluated value if there was no error reported.
 - Error message if there was at least an error occured:
   - Math Error: divide by 0, or sqrt of negative number.
@@ -133,20 +145,20 @@ Work-in-progress
     4.2 - ( * 7 )
     etc.
     ```
-### 4.2. EQN mode
+### 5.2. EQN mode
 - To be added.
-### 4.3. Integral mode
+### 5.3. Integral mode
 - To be added.
 
-## 5. What's working
+## 6. What's working
 - Input, evaluation, output to serial monitor.
 - Output to LCD display.
 - Edit the expression.
 
-## 6. What's not working/features being added in the future
+## 7. What's not working/features being added in the future
 - Screen scrolling.
 - EQN mode.
 - Integral mode.
 
-## 7. Debugging
+## 8. Debugging
 - The calculator will print the converted postfix expression as well as the final result to serial monitor (baud rate 9600).
