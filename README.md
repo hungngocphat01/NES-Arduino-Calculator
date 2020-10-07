@@ -3,7 +3,7 @@ Work-in-progress
 
 ## 0. Introduction.
 - This is a simple project of NES Academic Club, University of Science - Ho Chi Minh City, Vietnam. Project maintained by hungngocphat01.
-- This project manipulates Arduino into a simple calculator, with the ability to evaluate basic expressions (sin, cos, tan, sqrt supported); approximately evaluate single variable integral (via Riemann sum); 
+- This project manipulates Arduino into a simple calculator, with the ability to evaluate basic expressions (sin, cos, tan, sqrt supported); approximately evaluate single variable integral (via Riemann sum); and solves simple equations.
 
 ## 1. Wiring
 <table class="tg">
