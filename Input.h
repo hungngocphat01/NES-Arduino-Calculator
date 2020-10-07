@@ -1,15 +1,19 @@
+#include <Keypad.h>
+#include "ExprCalc.h"
+
 #define None "None"
 #define NO_NEWLINE false
+
+// Key codes
+#define PIKEY 5
+#define EKEY 6
+#define ANSKEY 7
+#define MODEKEY 8
 
 #define SIN 1
 #define COS 2
 #define TAN 3
 #define SQRT 4
-
-#define PIKEY 5
-#define EKEY 6
-#define ANSKEY 7
-#define MODEKEY 8
 
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //four columns
@@ -57,6 +61,11 @@ bool isSpecialKey(String key) {
     return (key == "<" || key == ">" || key == "!");
 }
 
+bool isDigitKey(String key) {
+    return (key == "0" || key == "1" || key == "2" || key == "3" || key == "4" || key == "5" || key == "6" ||
+            key == "7" || key == "8" || key == "9" || key == "." || key == "-");
+}
+
 String getKeyStr() {
     char key = readKey();
     if (key) {
@@ -81,4 +90,55 @@ String getKeyStr() {
         return String(key);
     }
     return None;
+}
+
+extern byte mode;
+
+bool modeKeyCheck (String key) {
+    if (key == "MODE") {
+        mode = 0;
+        return true;
+    }
+    return false;
+}
+
+// Read a number until a '=' is pressed. Returns "MENU" if menu btn is pressed
+String scanNumber() {
+    String key, result;
+    lcd.blink();
+    
+    while (key != "=") {
+        key = getKeyStr();
+        if (key == "!") {
+            result.remove(result.length() - 1);
+            lcd.setCursor(0, 1);
+            lcd.print("                    ");
+            lcd.setCursor(0, 1);
+            lcd.print(result);
+        }
+        if (!isDigitKey(key)) continue;
+        result += key;
+    
+        lcd.print(key);
+        delay(10);
+    }
+    lcd.noBlink();
+    
+    return result;
+}
+
+float scanCoefficient(String msg) {
+    lcd.clear();
+    lcd.print(msg);
+    
+    lcd.setCursor(0, 1);
+    String scanstr = scanNumber();
+    
+    return convToFloat(scanstr);
+}
+
+void pressAnyKey() {
+    while (getKeyStr() == None) {
+        delay(50);
+    }
 }
