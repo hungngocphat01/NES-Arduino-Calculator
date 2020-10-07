@@ -6,6 +6,12 @@
 #define INTGRLMODE 3
 #define MENUMODE 0
 
+// Function prototypes
+bool modeKeyCheck (String key); 
+void eqnMode();
+void compMode ();
+void menuMode();
+
 void printExpression(String* tokens, int n, int scroll = 0) {    
     int totalLength = 0;
     char buffer[BUFFERSIZE + 1];
@@ -34,23 +40,90 @@ void printExpression(String* tokens, int n, int scroll = 0) {
     lcd.print(buffer);
 }
 
-byte mode = COMPMODE;
+byte mode = MENUMODE;
 int currentDisplayingChars = 0;
 int scrollIndex = 0;
 
-void menuMode() {
-    lcd.clear();
-    lcd.noBlink();
-}
-
-void modeKeyCheck (String key) {
+bool modeKeyCheck (String key) {
     if (key == "MODE") {
         mode = MENUMODE;
-        menuMode();
+        return true;
+    }
+    return false;
+}
+
+void menuMode() {
+    bool printMenu = true; // to fix flickering
+    
+    String key;
+    while(true) {
+        key = getKeyStr();
+        if (printMenu) {
+            lcd.clear(); lcd.noBlink();
+            lcd.print("1.CMP      2.EQN");
+            lcd.setCursor(0, 1);
+            lcd.print("3.INTEGRAL");
+            printMenu = false;
+        }
+        
+        if (key == "1") {
+            mode = COMPMODE;
+            compMode();
+            Serial.println("Get out of func compMode");
+            printMenu = true;
+        }
+        else if (key == "2") {
+            mode = EQNMODE;
+            eqnMode();  
+            printMenu = true;
+        }
+    }
+}
+
+void eqnMode() {
+    lcd.noBlink();
+
+    int page = 0;
+    String key;
+
+    while (true) {
+        if (modeKeyCheck(key)) return;
+        if (page == 0) {
+            lcd.clear();
+            lcd.print("1.ax^2+bx+c=0");
+            lcd.setCursor(0, 1);
+            lcd.print("2.ax^3+bx^2...=0");
+    
+            do {
+                key = getKeyStr();
+                if (key == ">") page++;
+                else if (key == "1");
+                else if (key == "2");            
+            } while (key != ">" && key != "1" && key != "2" && key != "MODE");
+        }
+        if (page == 1) {
+            lcd.clear();
+            lcd.print("1.ax+by=0");
+            lcd.setCursor(2,1);
+            lcd.print("cx+dy=0");
+    
+            do {
+                key = getKeyStr();
+                if (key == "<") {
+                    page--;
+                }
+                else if (key == "1");        
+            } while (key != "<" && key != "1" && key != "MODE");
+        }
     }
 }
 
 void compMode () {
+    lcd.clear();
+    lcd.blink();
+
+    Serial.println("Get in function compMode:");
+    
     String tokens[max_size];
     int ti = 0;
 
@@ -61,11 +134,10 @@ void compMode () {
             byte keyTokenType = getTokenType(key);
             byte currTokenType = getTokenType(tokens[ti]);
             Serial.print(key);
-            Serial.print("Mode: ");
-            Serial.println(mode);
-
-            modeKeyCheck(key);
-            if (mode != COMPMODE) return;
+            
+            if (modeKeyCheck(key)) return;
+            Serial.print("ti: ");
+            Serial.println(ti);
             
             if (key == "=") {
                 Serial.println();
