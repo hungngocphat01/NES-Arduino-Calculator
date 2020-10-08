@@ -99,31 +99,6 @@ bool modeKeyCheck (String key) {
     return false;
 }
 
-// Read a number until a '=' is pressed. Returns "MENU" if menu btn is pressed
-String scanNumber() {
-    String key, result;
-    lcd.blink();
-    
-    while (key != "=") {
-        key = getKeyStr();
-        if (key == "!") {
-            result.remove(result.length() - 1);
-            lcd.setCursor(0, 1);
-            lcd.print("                    ");
-            lcd.setCursor(0, 1);
-            lcd.print(result);
-        }
-        if (!isDigitKey(key)) continue;
-        result += key;
-    
-        lcd.print(key);
-        delay(10);
-    }
-    lcd.noBlink();
-    
-    return result;
-}
-
 void pressAnyKey() {
     while (getKeyStr() == None) {
         delay(50);
@@ -133,6 +108,8 @@ void pressAnyKey() {
 float scanExpression (bool& menuflag, byte prntline = 0) {
     String tokens[max_size];
     int ti = 0;
+    
+    Serial.print("[INP] ");
 
     while (true) {
         String key = getKeyStr();
@@ -148,23 +125,27 @@ float scanExpression (bool& menuflag, byte prntline = 0) {
             }
             
             if (key == "=") {
-                Serial.println();
-                sprintMemoryUsage(F("Free mem when pressed =: "));
-                
                 sstack postfix;
-                ConvertToPostfix(tokens, ti + 1, postfix, prntline);
+
+                Serial.println();
+                sprintMemoryUsage(F("[STAT] Free mem after inp: "));
                 
+                ConvertToPostfix(tokens, ti + 1, postfix, prntline);
+
+                // Syntax error check
                 if (!errflag) {
+                    Serial.print(F("\n[OUTP] Postfix: "));
                     sprintArr(postfix.data, postfix.index + 1);
-                       
+                    
                     float result = PostfixEvaluate(postfix, prntline);
-                    int precision = 6;
-                    Serial.println();
-                    Serial.println(result, precision);
-                     
-                    return result;
+                    // Math error check
+                    if (!errflag) {
+                        int precision = 6;
+                        sprintVariable("[RESLT] ", result);
+                        return result;
+                    }       
                 }
-                else {
+                if (errflag) {
                     // After handling
                     errflag = false;
                     
@@ -198,7 +179,7 @@ float scanExpression (bool& menuflag, byte prntline = 0) {
                     ti--;
                 }
                 
-                Serial.print(F("\nAfter remove: "));
+                Serial.print(F("\n[INP] Expr after delete: "));
                 sprintArr(tokens, ti + 1, NO_NEWLINE);
                 
                 printExpression(tokens, ti + 1, prntline);
@@ -232,8 +213,7 @@ float scanCoefficient(String msg) {
     lcd.setCursor(0, 1);
     
     float scan = scanExpression(menuflag, 1);
-    Serial.print(msg);
-    Serial.print(scan);
+    sprintVariable("[INP] " + msg, scan);
 
     return scan;    
 }
