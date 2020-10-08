@@ -6,6 +6,7 @@ void eqnMode();
 void compMode ();
 void menuMode();
 void aboutMode();
+void integralMode();
 
 int currentDisplayingChars = 0;
 int scrollIndex = 0;
@@ -32,6 +33,10 @@ void menuMode() {
             eqnMode();  
             printMenu = true;
         }
+        else if (key == "3") {
+            integralMode();
+            printMenu = true;
+        }
         else if (key == "4") {
             aboutMode();
             printMenu = true;
@@ -41,6 +46,7 @@ void menuMode() {
 }
 
 void aboutMode() {
+    Serial.println("\n[STAT] About mode");
     while (true) {
         lcd.clear();
         lcd.print(F("NES  HCMUS  2020"));
@@ -75,8 +81,17 @@ void printSolution(String msg, float value) {
     lcd.clear();
 }
 
+void integralMode() {
+    Serial.println(F("\n[STAT] Integral mode"));
+    lcd.clear();
+    lcd.print("Integral mode");
+    lcd.setCursor(0, 1);
+    lcd.print("Developing");
+    pressAnyKey();
+}
+
 void eqnMode() {
-    Serial.println(F("EQN mode choosen"));
+    Serial.println(F("\n[STAT] EQN mode"));
     lcd.noBlink();
     String key;
         
@@ -94,7 +109,7 @@ void eqnMode() {
     
     // ax^2 + bx + c = 0
     if (key == "1") {
-        Serial.println(F("Quadratic eq chosen"));
+        Serial.println(F("[EQN] ax^2+bx+c=0"));
         lcd.clear();
         lcd.blink();
         float a = scanCoefficient("a=");
@@ -103,56 +118,73 @@ void eqnMode() {
         lcd.noBlink();
 
         float delta = b*b-4*a*c;
+        sprintVariable<float>(F("[OUTP] delta="), delta);
 
         if (delta == 0) {
             float x = -b/(2*a);
+            
+            sprintVariable<float>(F("[OUTP] x="), x);
             printSolution("x=", x);
         }
         else if (delta > 0) {
             float x1 = (-b-sqrt(delta))/(2*a);
             float x2 = (-b+sqrt(delta))/(2*a); 
+
+            sprintVariable<float>(F("[OUTP] x1="), x1);
+            sprintVariable<float>(F("[OUTP] x2="), x2);
+            
             printSolution("x1=", x1);
             printSolution("x2=", x2);
         }
         else if (delta < 0) {
+            Serial.println(F("[OUTP] No solution"));
+            
             lcd.clear();
             lcd.print("No solution");
             pressAnyKey();
         }
     }
     else if (key == "2") {
-        Serial.println(F("Sys of eqs 2 vars chosen"));
+        Serial.println(F("[EQN] ax+by=c"));
         lcd.clear();
         lcd.blink();
 
-        float a1 = scanCoefficient("[a1x+b1y=c1] a1=");
-        float b1 = scanCoefficient("[a1x+b1y=c1] b1=");
-        float c1 = scanCoefficient("[a1x+b1y=c1] c1=");
-        float a2 = scanCoefficient("[a2x+b2y=c2] a2=");
-        float b2 = scanCoefficient("[a2x+b2y=c2] b2=");
-        float c2 = scanCoefficient("[a2x+b2y=c2] c2=");
+        float a1 = scanCoefficient(F("[a1x+b1y=c1] a1="));
+        float b1 = scanCoefficient(F("[a1x+b1y=c1] b1="));
+        float c1 = scanCoefficient(F("[a1x+b1y=c1] c1="));
+        float a2 = scanCoefficient(F("[a2x+b2y=c2] a2="));
+        float b2 = scanCoefficient(F("[a2x+b2y=c2] b2="));
+        float c2 = scanCoefficient(F("[a2x+b2y=c2] c2="));
 
         float d = a1*b2 - a2*b1;
         float dx = c1*b2 - c2*b1;
         float dy = a1*c2 - a2*c1;
 
-        sprintVariable<float>("d", d);
-        sprintVariable<float>("dx", dx);
-        sprintVariable<float>("dy", dy);
+        sprintVariable<float>(F("[OUTP] d="), d);
+        sprintVariable<float>(F("[OUTP] dx="), dx);
+        sprintVariable<float>(F("[OUTP] dy="), dy);
 
         if (d == 0 && (dx != 0 || dy != 0)) {
+            Serial.println(F("[OUTP] No solution"));
+            
             lcd.clear();
-            lcd.print("No solution");
+            lcd.print(F("No solution"));          
             pressAnyKey();
         }
         else if (d == 0 && dx == 0 && dy == 0) {
+            Serial.println("[OUTP] Infnt solutions");
+            
             lcd.clear();
-            lcd.print("Infnt solutions");
+            lcd.print(F("Infnt solutions"));
             pressAnyKey();
         }
         else {
             float x = dx/d;
             float y = dy/d;
+            
+            sprintVariable<float>(F("[OUTP] x="), x);
+            sprintVariable<float>(F("[OUTP] y="), y);
+            
             printSolution("x=", x);
             printSolution("y=", y);            
         }
@@ -160,12 +192,11 @@ void eqnMode() {
 }
 
 void compMode () {
+    Serial.println(F("\n[STAT] COMP mode"));
     lcd.clear();
     bool menuflag = false;
     float result = 0;
-
-    Serial.println(F("Get in function compMode:"));
-    
+        
     do {
         lcd.blink();
         result = scanExpression(menuflag);
