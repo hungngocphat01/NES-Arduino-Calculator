@@ -92,11 +92,8 @@ String getKeyStr() {
     return None;
 }
 
-extern byte mode;
-
 bool modeKeyCheck (String key) {
     if (key == "MODE") {
-        mode = 0;
         return true;
     }
     return false;
@@ -127,18 +124,116 @@ String scanNumber() {
     return result;
 }
 
-float scanCoefficient(String msg) {
-    lcd.clear();
-    lcd.print(msg);
-    
-    lcd.setCursor(0, 1);
-    String scanstr = scanNumber();
-    
-    return convToFloat(scanstr);
-}
-
 void pressAnyKey() {
     while (getKeyStr() == None) {
         delay(50);
     }
+}
+
+float scanExpression (bool& menuflag, byte prntline = 0) {
+    String tokens[max_size];
+    int ti = 0;
+
+    while (true) {
+        String key = getKeyStr();
+        
+        if (key != None) {
+            byte keyTokenType = getTokenType(key);
+            byte currTokenType = getTokenType(tokens[ti]);
+            Serial.print(key);
+            
+            if (modeKeyCheck(key)) {
+                menuflag = true;
+                return 0;
+            }
+            
+            if (key == "=") {
+                Serial.println();
+                sprintMemoryUsage(F("Free mem when pressed =: "));
+                
+                sstack postfix;
+                ConvertToPostfix(tokens, ti + 1, postfix, prntline);
+                
+                if (!errflag) {
+                    sprintArr(postfix.data, postfix.index + 1);
+                       
+                    float result = PostfixEvaluate(postfix, prntline);
+                    int precision = 6;
+                    Serial.println();
+                    Serial.println(result, precision);
+                     
+                    return result;
+                }
+                else {
+                    // After handling
+                    errflag = false;
+                    
+                    // Reset
+                    ti = 0;
+                    tokens[ti] = "";
+                    pressAnyKey();
+                    lcdClrLine(prntline);
+                    lcd.blink();
+                    
+                    continue;
+                }
+            }
+//            else if (key == "<") {
+//                if (currentDisplayingChars == 16) scrollIndex--;
+//                printExpression(tokens, scrollIndex + 1);
+//                continue;
+//            }
+//            else if (key == ">") {
+//                if (scrollIndex < ti) scrollIndex++;
+//                printExpression(tokens, scrollIndex + 1);
+//                continue;
+//            }
+            else if (key == "!") {
+                if (currTokenType == NUM && tokens[ti] != "Ans" && tokens[ti] != "pi") {
+                    tokens[ti].remove(tokens[ti].length() - 1);
+                    printExpression(tokens, ti + 1, prntline);
+                }
+                else {
+                    tokens[ti] = "";
+                    ti--;
+                }
+                
+                Serial.print(F("\nAfter remove: "));
+                sprintArr(tokens, ti + 1, NO_NEWLINE);
+                
+                printExpression(tokens, ti + 1, prntline);
+                continue;
+            }
+            
+            // Bound checking
+            if (ti >= max_size) continue;
+            if (ti < 0) ti = 0;
+            
+            if (currTokenType == UNK) {
+                tokens[ti] = key;
+            }
+            else if (keyTokenType == currTokenType && keyTokenType == NUM) {
+                tokens[ti] += key;
+            }
+            else {
+                ti++;
+                tokens[ti] = key;
+            }
+            printExpression(tokens, ti + 1, prntline);
+        }
+    }
+}
+
+float scanCoefficient(String msg) {
+    lcd.clear();
+    lcd.print(msg);
+    bool menuflag = false;
+    
+    lcd.setCursor(0, 1);
+    
+    float scan = scanExpression(menuflag, 1);
+    Serial.print(msg);
+    Serial.print(scan);
+
+    return scan;    
 }
