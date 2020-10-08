@@ -9,8 +9,6 @@
 
 #define E 2.71828182
 
-#define OUTOFMEM "Out of memory"
-
 #define halt while(1)
 
 float Ans = 0;
@@ -71,7 +69,7 @@ int precedence(const String& op) {
 }
 
 void showSyntaxErr(byte errline = 0) {
-    Serial.println(F("Syntax error"));
+    Serial.println(F("[ERR] Syntax error"));
     
     lcd.setCursor(0, errline);
     lcdClrLine(errline);
@@ -82,7 +80,7 @@ void showSyntaxErr(byte errline = 0) {
 }
 
 void showMathErr(byte errline = 0) {
-    Serial.println(F("Math error"));
+    Serial.println(F("[ERR] Math error"));
     
     lcd.setCursor(0, errline);
     lcdClrLine(errline);
@@ -122,7 +120,7 @@ then it is a negative sign
 
 void ConvertToPostfix(String* infix, int n, sstack& result, byte errline = 0) {
     sstack tmp;
-    sprintMemoryUsage(F("Free mem before conversion: "));
+    sprintMemoryUsage(F("[STAT] Free mem conv: "));
     
     for (int i = 0; i < n; i++) {
         String& token = infix[i];
@@ -178,7 +176,6 @@ void ConvertToPostfix(String* infix, int n, sstack& result, byte errline = 0) {
         }
 
         if (errflag) {
-            Serial.println("Error encountered");
             return;
         }
     }
@@ -193,7 +190,7 @@ void ConvertToPostfix(String* infix, int n, sstack& result, byte errline = 0) {
 
 float PostfixEvaluate(const sstack& postfix, byte errline = 0) {
     fstack tmp;
-    sprintMemoryUsage(F("Free mem before evaluation: "));
+    sprintMemoryUsage(F("[STAT] Free mem eval: "));
     for (int i = 0; i <= postfix.index; i++) {
         String token = postfix[i];
         if (isNumber(token)) {
@@ -223,7 +220,6 @@ float PostfixEvaluate(const sstack& postfix, byte errline = 0) {
             else if (token == "^") tmp.push(pow(operand1, operand2));
         }
         if (errflag) {
-            Serial.println("Error encountered");
             return 0;
         }
     }
