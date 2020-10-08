@@ -10,6 +10,7 @@ void setup(){
     lcd.setCursor(0, 1);
     lcd.print(F(" (c) NES HCMUS"));
     delay(1500);
+    Serial.println(F("[STAT] Calculator ready"));
 }
 
 // main func
