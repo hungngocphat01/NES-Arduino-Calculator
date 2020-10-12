@@ -1,6 +1,8 @@
 #include <LiquidCrystal_I2C.h>
 #define BUFFERSIZE 16
 
+byte prntline = 0;
+
 LiquidCrystal_I2C lcd(0x27,16,2);
 
 void lcdClrLine(byte line) {
@@ -11,7 +13,7 @@ void lcdClrLine(byte line) {
     lcd.setCursor(0, line);
 }
 
-void printExpression(String* tokens, int n, byte line = 0) {    
+void printExpression(String* tokens, int n) {    
     int totalLength = 0;
     char buffer[BUFFERSIZE + 1];
     int k = BUFFERSIZE;
@@ -34,8 +36,8 @@ void printExpression(String* tokens, int n, byte line = 0) {
     }
     buffer[len] = '\0';
         
-    lcdClrLine(line);
-    lcd.setCursor(0, line);
+    lcdClrLine(prntline);
+    lcd.setCursor(0, prntline);
     lcd.blink();
     lcd.print(buffer);
 }

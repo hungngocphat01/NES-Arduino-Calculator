@@ -5,15 +5,18 @@
 #define NO_NEWLINE false
 
 // Key codes
+#define SINKEY 1
+#define COSKEY 2
+#define TANKEY 3
+#define SQRTKEY 4
 #define PIKEY 5
 #define EKEY 6
 #define ANSKEY 7
 #define MODEKEY 8
+#define XKEY 9
 
-#define SIN 1
-#define COS 2
-#define TAN 3
-#define SQRT 4
+bool menuflag = false;
+bool allowxkey = false;
 
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //four columns
@@ -38,19 +41,18 @@ char readKey() {
     char key = customKeypad.getKey();
     if (digitalRead(shiftPin) == LOW) {
         switch (key) {
-        case '+': return SIN;
-        case '-': return COS;
-        case '*': return TAN;
+        case '+': return SINKEY;
+        case '-': return COSKEY;
+        case '*': return TANKEY;
         case '1': return '^';
-        case '2': return SQRT;
+        case '2': return SQRTKEY;
         case '3': return PIKEY;
         case '6': return EKEY;
         case '9': return ANSKEY;
         case '/': return MODEKEY;
+        case '.': if (allowxkey) return XKEY; else break;
         case '4': return '(';
         case '5': return ')';
-        case '7': return '<'; // Left key
-        case '8': return '>'; // Right key
         case '0': return '!'; // Delete key
         }
     }
@@ -70,13 +72,13 @@ String getKeyStr() {
     char key = readKey();
     if (key) {
         switch (key) {
-        case SIN:
+        case SINKEY:
             return "sin";
-        case COS:
+        case COSKEY:
             return "cos";
-        case TAN:
+        case TANKEY:
             return "tan";
-        case SQRT:
+        case SQRTKEY:
             return "sqrt";
         case PIKEY:
             return "pi";
@@ -86,6 +88,8 @@ String getKeyStr() {
             return "Ans";
         case MODEKEY:
             return "MODE";
+        case XKEY:
+            return "X";
         }
         return String(key);
     }
@@ -105,74 +109,36 @@ void pressAnyKey() {
     }
 }
 
-float scanExpression (bool& menuflag, byte prntline = 0) {
-    String tokens[max_size];
-    int ti = 0;
+void scanTokens (String* tokens, int& ti) {
+    Serial.println(F("[STAT] Scanning tokens"));
+    ti = 0;
     
     Serial.print("[INP] ");
 
     while (true) {
         String key = getKeyStr();
-        
+
         if (key != None) {
+            // Bound checking
+            if (ti >= max_size) continue;
+            if (ti < 0) ti = 0;
+            
             byte keyTokenType = getTokenType(key);
             byte currTokenType = getTokenType(tokens[ti]);
             Serial.print(key);
-            
+
             if (modeKeyCheck(key)) {
                 menuflag = true;
-                return 0;
+                return;
             }
             
             if (key == "=") {
-                sstack postfix;
-
-                Serial.println();
-                sprintMemoryUsage(F("[STAT] Free mem after inp: "));
-                
-                ConvertToPostfix(tokens, ti + 1, postfix, prntline);
-
-                // Syntax error check
-                if (!errflag) {
-                    Serial.print(F("\n[OUTP] Postfix: "));
-                    sprintArr(postfix.data, postfix.index + 1);
-                    
-                    float result = PostfixEvaluate(postfix, prntline);
-                    // Math error check
-                    if (!errflag) {
-                        int precision = 6;
-                        sprintVariable("[RESLT] ", result);
-                        return result;
-                    }       
-                }
-                if (errflag) {
-                    // After handling
-                    errflag = false;
-                    
-                    // Reset
-                    ti = 0;
-                    tokens[ti] = "";
-                    pressAnyKey();
-                    lcdClrLine(prntline);
-                    lcd.blink();
-                    
-                    continue;
-                }
+                return;
             }
-//            else if (key == "<") {
-//                if (currentDisplayingChars == 16) scrollIndex--;
-//                printExpression(tokens, scrollIndex + 1);
-//                continue;
-//            }
-//            else if (key == ">") {
-//                if (scrollIndex < ti) scrollIndex++;
-//                printExpression(tokens, scrollIndex + 1);
-//                continue;
-//            }
             else if (key == "!") {
                 if (currTokenType == NUM && tokens[ti] != "Ans" && tokens[ti] != "pi") {
                     tokens[ti].remove(tokens[ti].length() - 1);
-                    printExpression(tokens, ti + 1, prntline);
+                    printExpression(tokens, ti + 1);
                 }
                 else {
                     tokens[ti] = "";
@@ -182,13 +148,9 @@ float scanExpression (bool& menuflag, byte prntline = 0) {
                 Serial.print(F("\n[INP] Expr after delete: "));
                 sprintArr(tokens, ti + 1, NO_NEWLINE);
                 
-                printExpression(tokens, ti + 1, prntline);
+                printExpression(tokens, ti + 1);
                 continue;
             }
-            
-            // Bound checking
-            if (ti >= max_size) continue;
-            if (ti < 0) ti = 0;
             
             if (currTokenType == UNK) {
                 tokens[ti] = key;
@@ -200,10 +162,64 @@ float scanExpression (bool& menuflag, byte prntline = 0) {
                 ti++;
                 tokens[ti] = key;
             }
-            printExpression(tokens, ti + 1, prntline);
+            printExpression(tokens, ti + 1);
         }
     }
 }
+
+float evalExpression (String* tokens, int ti) {
+    Serial.println(F("[STAT] Evaluating expressions"));
+    sstack postfix;
+
+    Serial.println();
+    
+    ConvertToPostfix(tokens, ti + 1, postfix);
+
+    // Syntax error check
+    if (!errflag) {
+        Serial.print(F("\n[OUTP] Postfix: "));
+        sprintArr(postfix.data, postfix.index + 1);
+        
+        float result = PostfixEvaluate(postfix);
+        // Math error check
+        if (!errflag) {
+            return result;
+        }
+    }
+    return 0;
+}
+
+float scanAndEvalExpression() {
+    String tokens[max_size];
+    int ti = 0;
+
+    while (true) {
+        ti = 0;
+        tokens[ti] = "";
+        
+        Serial.println(F("[STAT] Sc&ev - next loop"));
+        scanTokens(tokens, ti);
+        if (menuflag) return;
+        
+        float result = evalExpression(tokens, ti);
+    
+        if (errflag) {
+            // After handling
+            errflag = false;
+            
+            // Reset
+            ti = 0;
+            tokens[ti] = "";
+            pressAnyKey();
+            lcdClrLine(prntline);
+            lcd.blink();
+             
+            continue;
+        }
+        return result;
+    }
+}
+
 
 float scanCoefficient(String msg) {
     lcd.clear();
@@ -212,7 +228,7 @@ float scanCoefficient(String msg) {
     
     lcd.setCursor(0, 1);
     
-    float scan = scanExpression(menuflag, 1);
+    float scan = scanAndEvalExpression();
     sprintVariable("[INP] " + msg, scan);
 
     return scan;    
