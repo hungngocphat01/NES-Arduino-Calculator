@@ -1,5 +1,4 @@
 #include "Stack.h"
-#include "Utils.h"
 #include "Screen.h"
 
 // Token types
@@ -12,6 +11,7 @@
 #define halt while(1)
 
 float Ans = 0;
+float X = 0;
 bool errflag = false;
 
 int getTokenType(String token) {
@@ -45,6 +45,7 @@ float convToFloat(const String& token) {
         if (token == "pi") return PI;
         if (token == "e") return E;
         if (token == "Ans") return Ans;
+        if (token == "X") return X;
         
         // Negative numbers handling since Arduino's .toFloat() cannot handle negative numbers
         if (token[0] == '-') {
@@ -68,22 +69,22 @@ int precedence(const String& op) {
     return 0;
 }
 
-void showSyntaxErr(byte errline = 0) {
+void showSyntaxErr() {
     Serial.println(F("[ERR] Syntax error"));
     
-    lcd.setCursor(0, errline);
-    lcdClrLine(errline);
+    lcd.setCursor(0, prntline);
+    lcdClrLine(prntline);
     
     lcd.print(F("Syntax error"));
     lcd.noBlink();
     errflag = true;
 }
 
-void showMathErr(byte errline = 0) {
+void showMathErr() {
     Serial.println(F("[ERR] Math error"));
     
-    lcd.setCursor(0, errline);
-    lcdClrLine(errline);
+    lcd.setCursor(0, prntline);
+    lcdClrLine(prntline);
     
     lcd.print(F("Math error"));
     lcd.noBlink();
@@ -104,11 +105,11 @@ void showMathErr(byte errline = 0) {
     + Before: operator, none
     + After: '(', number
 - '(':
-    + Before: none, operator
-    + After: number, '-', operator
+    + Before: none, operator, '('
+    + After: number, '-', operator, ('
 - ')'
-    + Before: number
-    + After: none, double operator
+    + Before: number, ')'
+    + After: none, double operator, ')'
 
 */
 
@@ -118,29 +119,30 @@ void showMathErr(byte errline = 0) {
 then it is a negative sign
 */
 
-void ConvertToPostfix(String* infix, int n, sstack& result, byte errline = 0) {
+void ConvertToPostfix(String* infix, int n, sstack& result, byte prntline = 0) {
     sstack tmp;
     sprintMemoryUsage(F("[STAT] Free mem conv: "));
     
     for (int i = 0; i < n; i++) {
         String& token = infix[i];
+        sprintVariable("Processing: ", token);
         if (token == "(") {
-            if (i == n - 1) showSyntaxErr(errline);
-            if (i - 1 >= 0 && !isOperator(infix[i - 1])) showSyntaxErr(errline);
-            if (i + 1 < n && !isNumber(infix[i + 1]) && !isOperator(infix[i + 1]) && infix[i + 1] != "-") showSyntaxErr(errline);
+            if (i == n - 1) showSyntaxErr();
+            if (i - 1 >= 0 && !isOperator(infix[i - 1]) && infix[i - 1] != "(") showSyntaxErr();
+            if (i + 1 < n && !isNumber(infix[i + 1]) && !isOperator(infix[i + 1]) && infix[i + 1] != "-" && infix[i + 1] != "(") showSyntaxErr();
 
             tmp.push(token);
         }
         else if (token == ")") {
-            if (i == 0) showSyntaxErr(errline);
-            if (i - 1 >= 0 && !isNumber(infix[i - 1])) showSyntaxErr(errline);
-            if (i + 1 < n && (!isOperator(infix[i + 1]) || isSingleOp(infix[i + 1]))) showSyntaxErr(errline);
+            if (i == 0) showSyntaxErr();
+            if (i - 1 >= 0 && !isNumber(infix[i - 1]) && infix[i - 1] != ")") showSyntaxErr();
+            if (i + 1 < n && (!isOperator(infix[i + 1]) || isSingleOp(infix[i + 1])) && infix[i + 1] != ")") showSyntaxErr();
 
             String pop;
             do {
                 // If ( is missing
                 if (tmp.isEmpty()) {
-                    showSyntaxErr(errline);
+                    showSyntaxErr();
                 }
                 pop = tmp.pop();
                 if (pop != "(") {
@@ -156,14 +158,14 @@ void ConvertToPostfix(String* infix, int n, sstack& result, byte errline = 0) {
             }
             // Check syntax if not negative sign
             if (isSingleOp(token)) {
-                if (i == n - 1) showSyntaxErr(errline);
-                if (i - 1 >= 0 && !isOperator(infix[i - 1])) showSyntaxErr(errline);
-                if (i + 1 < n && !isNumber(infix[i + 1]) && infix[i + 1] != "(") showSyntaxErr(errline);
+                if (i == n - 1) showSyntaxErr();
+                if (i - 1 >= 0 && !isOperator(infix[i - 1])) showSyntaxErr();
+                if (i + 1 < n && !isNumber(infix[i + 1]) && infix[i + 1] != "(") showSyntaxErr();
             }
             else {
-                if (i == 0 || i == n - 1) showSyntaxErr(errline);
-                if (i - 1 >= 0 && !isNumber(infix[i - 1]) && infix[i - 1] != ")") showSyntaxErr(errline);
-                if (i + 1 < n && !isNumber(infix[i + 1]) && infix[i + 1] != "(" && !isSingleOp(infix[i + 1])) showSyntaxErr(errline);      
+                if (i == 0 || i == n - 1) showSyntaxErr();
+                if (i - 1 >= 0 && !isNumber(infix[i - 1]) && infix[i - 1] != ")") showSyntaxErr();
+                if (i + 1 < n && !isNumber(infix[i + 1]) && infix[i + 1] != "(" && !isSingleOp(infix[i + 1])) showSyntaxErr();      
             }
 
             if (!tmp.isEmpty() && precedence(token) <= precedence(tmp.top())) {
@@ -188,7 +190,7 @@ void ConvertToPostfix(String* infix, int n, sstack& result, byte errline = 0) {
 }
 
 
-float PostfixEvaluate(const sstack& postfix, byte errline = 0) {
+float PostfixEvaluate(const sstack& postfix, byte prntline = 0) {
     fstack tmp;
     sprintMemoryUsage(F("[STAT] Free mem eval: "));
     for (int i = 0; i <= postfix.index; i++) {
@@ -202,7 +204,7 @@ float PostfixEvaluate(const sstack& postfix, byte errline = 0) {
             else if (token == "cos") tmp.push(cos(operand));
             else if (token == "tan") tmp.push(tan(operand));
             else if (token == "sqrt") {
-                if (operand < 0) showMathErr(errline);
+                if (operand < 0) showMathErr();
                 tmp.push(sqrt(operand));
             }
         }
@@ -214,7 +216,7 @@ float PostfixEvaluate(const sstack& postfix, byte errline = 0) {
             else if (token == "-") tmp.push(operand1 - operand2);
             else if (token == "*") tmp.push(operand1 * operand2);
             else if (token == "/") {
-                if (operand2 == 0) showMathErr(errline);
+                if (operand2 == 0) showMathErr();
                 tmp.push(operand1 / operand2);
             } 
             else if (token == "^") tmp.push(pow(operand1, operand2));

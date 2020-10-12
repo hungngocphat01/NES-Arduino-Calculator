@@ -16,6 +16,9 @@ void menuMode() {
     
     String key;
     while(true) {
+        menuflag = false;
+        errflag = false; //reset
+        
         key = getKeyStr();
         if (printMenu) {
             lcd.clear(); lcd.noBlink();
@@ -54,14 +57,12 @@ void aboutMode() {
         lcd.print(F("Ngoc Phat  K19IT"));
         delay(4000);
         lcd.clear();
-        lcd.print(F("Source code"));
-        lcd.setCursor(0, 1);
-        lcd.print(F("link:"));
+        lcd.print(F("Github link:..."));
         delay(2000);
         lcd.clear();
-        lcd.print(F("github/phathung2001/arduino-calculator"));
-        delay(1000);
-        for (int i = 0; i < 26; i++) {
+        lcd.print(F("hungngocphat01/arduino-calculator"));
+        delay(2000);
+        for (int i = 0; i < 20; i++) {
             lcd.scrollDisplayLeft();
             delay(500);
         }
@@ -83,15 +84,66 @@ void printSolution(String msg, float value) {
 
 void integralMode() {
     Serial.println(F("\n[STAT] Integral mode"));
+
+    allowxkey = true;
+    prntline = 1;
+
     lcd.clear();
-    lcd.print("Integral mode");
-    lcd.setCursor(0, 1);
-    lcd.print("Developing");
-    pressAnyKey();
+    lcd.print("Intgrl expr:");
+    lcd.setCursor(0, prntline);
+    
+    String tokens[max_size];
+    int ti;
+    scanTokens(tokens, ti);
+
+    sprintMemoryUsage(F("Free mem after scanning: "));
+
+    if (menuflag) return;
+    if (errflag) {
+        pressAnyKey();
+        return;
+    }
+
+    float a = scanCoefficient("a=");
+    float b = scanCoefficient("b=");
+
+    sprintMemoryUsage(F("Free mem after scanning a, b: "));
+    
+    const int ranges = 10;
+
+    // Middle Riemann sum
+    float rsum = 0;
+    float dx = abs(b - a)/ranges;
+    int negative = 1;
+
+    if (b < a) {
+        float t = b;
+        b = a;
+        a = b;
+        negative = -1;
+    }
+
+    for (int i = 0; i < ranges; i++) {
+        X = (2 * a + dx * (2 * i + 1)) / 2;
+        rsum += evalExpression(tokens, ti);
+
+        if (errflag) {
+            errflag = false;
+            pressAnyKey();
+            return;
+        }
+    }
+
+    rsum *= dx * negative;
+    printSolution("Result:", rsum);
 }
 
 void eqnMode() {
     Serial.println(F("\n[STAT] EQN mode"));
+    
+    prntline = 1;
+    allowxkey = false;
+    
     lcd.noBlink();
     String key;
         
@@ -194,12 +246,15 @@ void eqnMode() {
 void compMode () {
     Serial.println(F("\n[STAT] COMP mode"));
     lcd.clear();
-    bool menuflag = false;
     float result = 0;
+
+    prntline = 0;
+    allowxkey = false;
         
     do {
+        sprintMemoryUsage(F("Free mem before input: "));
         lcd.blink();
-        result = scanExpression(menuflag);
+        result = scanAndEvalExpression();
         if (!menuflag) {
             lcd.noBlink();
             printSolution("Result:", result);
