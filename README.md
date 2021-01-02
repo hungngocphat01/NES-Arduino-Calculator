@@ -3,7 +3,7 @@ Work-in-progress
 
 ## 0. Introduction.
 - This is a simple project of NES Academic Club, University of Science - Ho Chi Minh City, Vietnam.
-- This project manipulates Arduino into a simple calculator, with the abilities to evaluate basic expressions (sin, cos, tan, sqrt supported); evaluate approximately value of single variable integral (using Riemann middle sum); and solve simple equations.
+- This project manipulates Arduino into a simple calculator, with the abilities to evaluate basic expressions (sin, cos, tan, sqrt supported); ~~evaluate approximately value of single variable integral (using Riemann middle sum)~~; and solve simple equations.
 - Project made from scratch and maintained by hungngocphat01, with the exception of ``Keypad.h`` (courtesy of Mark Stanley, Alexander Brevig) and ``LiquidCrystal_I2C.h`` (courtesy of Frank de Brabander).
 
 ## 1. Wiring
@@ -148,9 +148,13 @@ Work-in-progress
     etc.
     ```
 ### 5.2. EQN mode
-- To be added.
+- Capable of solving quadratic equation (ax^2 + bx + c = 0, complex solutions are not supported) and 2-variable system of equations (**a**x + **b**y = **c**).
+- Works similarly to [COMP Mode](#51-comp-mode).
+  - User is prompted to choose the equation type.
+  - Coefficients are asked. User can also enter an equation to be calculated into a value which substitutes for a coefficient.
+  - The calculator will solve the equation and the result will be displayed on the screen.
 ### 5.3. Integral mode
-- To be added.
+- Not enough memory to implement.
 
 ## 6. What's working
 - Keypad, LCD screen.
