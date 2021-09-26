@@ -1,10 +1,9 @@
 # Arduino simple calculator
-Work-in-progress
 
 ## 0. Introduction.
-- This is a simple project of NES Academic Club, University of Science - Ho Chi Minh City, Vietnam.
-- This project manipulates Arduino into a simple calculator, with the abilities to evaluate basic expressions (sin, cos, tan, sqrt supported); ~~evaluate approximately value of single variable integral (using Riemann middle sum)~~; and solve simple equations.
-- Project made from scratch and maintained by hungngocphat01, with the exception of ``Keypad.h`` (courtesy of Mark Stanley, Alexander Brevig) and ``LiquidCrystal_I2C.h`` (courtesy of Frank de Brabander).
+- Courtesy of NES Academic Club, University of Science - Ho Chi Minh City, Vietnam.
+- This is the "firmware" to turn Arduino into a basic calculator, with the abilities to evaluate basic expressions (sin, cos, tan, sqrt supported); ~~evaluate approximately value of single variable integral (using Riemann middle sum)~~; and solve simple equations (quadratic equation, two-variable linear system of equations).
+- Project created from scratch and originally maintained by hungngocphat01, with the exception of ``Keypad.h`` (courtesy of Mark Stanley, Alexander Brevig) and ``LiquidCrystal_I2C.h`` (courtesy of Frank de Brabander).
 
 ## 1. Wiring
 <table class="tg">
@@ -60,10 +59,10 @@ Work-in-progress
 - ``tokenizer.py``: creates an array of tokens, for debugging purpose only.
 
 ## 3. Program flow
-- The ``void loop()`` function calls the ``void menuMode()`` function. This function acts as the main function and the program execution will stay in this function under any circumstances. Here, the user chooses the operating mode of the calculator.
+- The ``void loop()`` function calls the ``void menuMode()`` function. This function acts as the main function and the program execution will always stay in this function. When the function is called, the user have to choose the operating mode of the calculator.
   - If the user chooses COMP mode, ``void compMode()`` will be called.
-  - The same thing happens with EQN mode (``void eqnMode()``) and INTERGRAL mode (``void intgrlMode()``). More details about these mode are available in [5. Working modes](#51-comp-mode).
-  - If the user presses the ``MODE`` button in COMP, EQN or INTEGRAL mode, the function which handles the respective mode will return. The program then goes back to ``void menuMode()``, waiting for another mode to be choosen.
+  - The same thing happens with EQN mode (``void eqnMode()``) ~~and INTERGRAL mode (``void intgrlMode()``)~~. More details about these mode are available in [5. Working modes](#51-comp-mode).
+  - If the user presses the ``MODE`` button in COMP, EQN or ~~INTEGRAL mode~~, the function which handles the respective mode will return. The program then goes back to ``void menuMode()``, waiting for another mode to be choosen.
 
 ## 4. Input
 - 4x4 matrix keypad.
@@ -134,12 +133,12 @@ Work-in-progress
 #### 5.1.1. How does it work
 - The calculator receives input from the 4x4 matrix keypad, parses the tokens immediately as soon as they are sent from the keypad, and categorizes them into ``numbers`` and ``operators``.
 - The user can press ``DEL`` (``Shift`` + ``0``) key to pop the last operand/operator out of the expression, or ``=`` to start evaluating.
-- After that, the original infix expression is converted into a postfix expression and is evaluated (shunting-yard algorithm).
-- Finally, the result is displayed on the LCD screen if there was no error reported.
+- Then, the original infix expression is converted into a postfix expression and is evaluated (using shunting-yard algorithm).
+- Finally, the result is displayed on the LCD screen if there is no error.
 
 #### 5.1.2. Output
-- Evaluation result if there was no error reported.
-- Error message if there was at least one error occured:
+- Evaluation result if there is no error.
+- Error message if there is least one error occured:
   - Math Error: divided by 0, or sqrt of negative number.
   - Syntax Error: for instance
     ```
@@ -148,7 +147,7 @@ Work-in-progress
     etc.
     ```
 ### 5.2. EQN mode
-- Capable of solving quadratic equation (ax^2 + bx + c = 0, complex solutions are not supported) and 2-variable system of equations (**a**x + **b**y = **c**).
+- Capable of solving quadratic equation (ax^2 + bx + c = 0, complex solutions are not supported) and 2-variable system of linear equations (**a**x + **b**y = **c**).
 - Works similarly to [COMP Mode](#51-comp-mode).
   - User is prompted to choose the equation type.
   - Coefficients are asked. User can also enter an equation to be calculated into a value which substitutes for a coefficient.
@@ -159,11 +158,11 @@ Work-in-progress
 ## 6. What's working
 - Keypad, LCD screen.
 - COMP mode.
+- EQN mode.
 - Mode changing.
 
 ## 7. What's not working/features being added in the future
 - Screen scrolling.
-- EQN mode.
 - Integral mode.
 
 ## 8. Debugging
