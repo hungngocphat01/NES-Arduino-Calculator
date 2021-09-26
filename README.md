@@ -5,6 +5,10 @@
 - This is the "firmware" to turn Arduino into a basic calculator, with the abilities to evaluate basic expressions (sin, cos, tan, sqrt supported); ~~evaluate approximately value of single variable integral (using Riemann middle sum)~~; and solve simple equations (quadratic equation, two-variable linear system of equations).
 - Project created from scratch and originally maintained by hungngocphat01, with the exception of ``Keypad.h`` (courtesy of Mark Stanley, Alexander Brevig) and ``LiquidCrystal_I2C.h`` (courtesy of Frank de Brabander).
 
+![**Prototype** of an Arduino running this "calculator firmware" at NES Academic Club (2020).](prototype.jpg)  
+
+**Prototype** of an Arduino running this "calculator firmware" at NES Academic Club (2020).
+
 ## 1. Wiring
 <table class="tg">
 <thead>
